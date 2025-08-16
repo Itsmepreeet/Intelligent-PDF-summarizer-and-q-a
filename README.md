@@ -1,3 +1,4 @@
+deployed app link : https://summarizerpdfbypreet.streamlit.app/
 PDF Q&A and Summarization with LangGraph
 
 An AI-powered interactive PDF assistant built with LangChain, LangGraph, FAISS, HuggingFace Embeddings, and Streamlit.
