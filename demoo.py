@@ -17,13 +17,13 @@ from dotenv import load_dotenv
 
 load_dotenv()  # works locally
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 if GROQ_API_KEY is None:
     # fallback for Streamlit Cloud
     import streamlit as st
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
-llm = ChatGroq(model="llama-3.1-8b-instant")
+llm = ChatGroq(model="llama-3.1-8b-instant", api_key=GROQ_API_KEY)
 FAISS_PATH = "faiss_index"
 
 st.set_page_config(page_title="PDF Q&A with LangGraph", layout="wide")
