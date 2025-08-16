@@ -2,7 +2,6 @@
 import nest_asyncio
 nest_asyncio.apply()
 import os
-from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -13,8 +12,17 @@ import streamlit as st
 import asyncio
 import nest_asyncio
 nest_asyncio.apply()
+import os
+from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv()  # works locally
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if GROQ_API_KEY is None:
+    # fallback for Streamlit Cloud
+    import streamlit as st
+    GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+
 llm = ChatGroq(model="llama-3.1-8b-instant")
 FAISS_PATH = "faiss_index"
 
