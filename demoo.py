@@ -17,12 +17,20 @@ from dotenv import load_dotenv
 
 load_dotenv()  # works locally
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
-if GROQ_API_KEY is None:
-    # fallback for Streamlit Cloud
-    import streamlit as st
-    GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+huggingface_token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
+# If not found, fall back to Streamlit Cloud secrets
+if not GROQ_API_KEY:
+    GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
+
+if not huggingface_token:
+    huggingface_token = st.secrets.get("HUGGINGFACEHUB_API_TOKEN")
+
+# Set environment for HuggingFace
+if huggingface_token:
+    os.environ["HUGGINGFACEHUB_API_TOKEN"] = huggingface_token
+
+# Initialize LLM
 llm = ChatGroq(model="llama-3.1-8b-instant", api_key=GROQ_API_KEY)
 FAISS_PATH = "faiss_index"
 
@@ -62,21 +70,20 @@ if pdf_path:
         for d in docs
     ]
 
+    splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=120)
+    chunks = splitter.split_documents(docs)
 
-splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=120)
-chunks = splitter.split_documents(docs)
+    embed = HuggingFaceEmbeddings(
+        model_name="nomic-ai/nomic-embed-text-v1",
+        model_kwargs={"trust_remote_code": True} 
+    )
 
+    if chunks:   
+        vector_store = FAISS.from_documents(chunks, embedding=embed)
+        retriever = vector_store.as_retriever(search_type='similarity', search_kwargs={"k": 3})
+    else:
+        st.warning("No chunks could be created from the uploaded PDF.")
 
-embed = HuggingFaceEmbeddings(
-    model_name="nomic-ai/nomic-embed-text-v1",
-    model_kwargs={"trust_remote_code": True} 
-)
-
-vector_store = FAISS.from_documents(chunks, embedding=embed)
-
-
-
-retriever = vector_store.as_retriever(search_type='similarity', search_kwargs={"k": 3})
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
