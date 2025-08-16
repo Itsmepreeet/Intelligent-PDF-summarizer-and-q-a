@@ -1,4 +1,3 @@
-
 import nest_asyncio
 nest_asyncio.apply()
 import os
@@ -69,7 +68,6 @@ if pdf_path:
         Document(page_content=" ".join(d.page_content.split()), metadata=d.metadata)
         for d in docs
     ]
-
     splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=120)
     chunks = splitter.split_documents(docs)
 
