@@ -79,6 +79,7 @@ if pdf_path:
     )
 
     if chunks:   
+        global vector_store,retriever
         vector_store = FAISS.from_documents(chunks, embedding=embed)
         retriever = vector_store.as_retriever(search_type='similarity', search_kwargs={"k": 3})
     else:
